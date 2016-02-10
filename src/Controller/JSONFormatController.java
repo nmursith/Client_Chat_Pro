@@ -90,11 +90,7 @@ public class JSONFormatController {
         try {
             // System.out.println("Decoding :"+  JSON);
             JSONObject jsonObject = (JSONObject) (new JSONParser().parse(JSON));
-
             text = (String) jsonObject.get("botsay");
-
-
-
 
             // System.out.println(messg);
 

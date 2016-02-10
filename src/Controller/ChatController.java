@@ -1,6 +1,6 @@
-package View;
+package Controller;
 
-import Controller.PostRequestController;
+import Model.ChatMessage;
 import Model.Constant;
 import Model.OperatorBubble;
 import Model.UserBubble;
@@ -13,7 +13,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
 
+import javax.jms.JMSException;
 import java.io.IOException;
 
 public class ChatController {
@@ -21,14 +23,20 @@ public class ChatController {
     public TextArea messageTextField;
     public GridPane chatHolder;
     public int IDtracker;
+    public ChatController controller;
+    public int state;
+    public OperatorController operatorController;
 
-    public ChatController(){
+    public ChatController() throws JMSException {
         chatHolder = getGridPane();
         IDtracker = 0;
+        state = PostRequestController.state;
+        operatorController = new OperatorController("USER", "chat.USER", this);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 messageDisplay.setContent(chatHolder);
+                messageDisplay.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
                 String message= null;
                 try {
                     message = PostRequestController.SendMessageAIML(Constant.DIRDEVELOPERSTART);
@@ -80,38 +88,72 @@ public class ChatController {
     }
 
     private void sendMessage() throws IOException {
-        String message = messageTextField.getText();
+        String enteredmessage = messageTextField.getText();
         messageTextField.clear();
 
+
         try {
 
-            OperatorBubble bubble = new OperatorBubble("USER",message, "S" );
+            OperatorBubble bubble = new OperatorBubble("USER",enteredmessage, "S" );
             chatHolder.addRow(getIDtracker(), bubble.getRoot());
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        try {
-            message = PostRequestController.SendMessageAI(message);
-            UserBubble bubble = new UserBubble("BOT",message, "S" );
-            chatHolder.addRow(getIDtracker(), bubble.getRoot());
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    messageDisplay.setVvalue(messageDisplay.getVmax());
-                }
-            });
+/*        try {
+            //Thread.sleep(1000);
+
+            String message = PostRequestController.SendMessageAI(enteredmessage);
+            state = PostRequestController.state;
+
+           if(!message.equals("")){
+               UserBubble bubble = new UserBubble("BOT",message, "S" );
+               chatHolder.addRow(getIDtracker(), bubble.getRoot());
+               Platform.runLater(() -> {
+                   messageDisplay.setVvalue(messageDisplay.getVmax());
+                   /////////
+               });
+           }
 
         } catch (IOException e) {
             e.printStackTrace();
+        }*/
+
+        if(!operatorController.isClosedAlready()){
+            operatorController.createSession();
+            operatorController.startDefaultOperatorAction();
+
+        }
+        try {
+            ChatMessage chatMessage = getObjectMessage(enteredmessage);
+            operatorController.sendMessage(chatMessage,operatorController);
+        } catch (JMSException e) {
+            e.printStackTrace();
         }
 
-
-
+        Platform.runLater(() -> {
+            messageDisplay.setVvalue(messageDisplay.getVmax());
+            /////////
+        });
     }
 
+    public ChatMessage getObjectMessage(String messageText){
+        ChatMessage chatMessage =  new ChatMessage();
+        chatMessage.setTextMessage(messageText);
+        return chatMessage;
+    }
+
+    public synchronized ChatController getInstance(){
+        if(controller==null){
+            controller = this;
+        }
+        return  controller;
+    }
     public int getIDtracker() {
         IDtracker++;
         return IDtracker;
+    }
+    public Stage getStage(){
+        return  null;
     }
 }

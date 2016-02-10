@@ -10,7 +10,7 @@ import java.net.URL;
  * Created by mmursith on 2/10/2016.
  */
 public class PostRequestController {
-    private  static int state;
+    public static int state;
 
     public static void main(String[]args){
         try {
@@ -154,7 +154,7 @@ public class PostRequestController {
         } else if (msg.indexOf("DIRROUTETOOPERATOR") > -1) {
 
             String replace = "";
-
+            state =2;
 
             return msg.replace("DIRROUTETOOPERATOR", replace); //.replace("DIRROUTETOOPERATOR", "");
 

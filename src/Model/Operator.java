@@ -23,7 +23,7 @@ public class Operator{
     private boolean isAnswered;
 
     static {
-        //messageBrokerUrl = Constant.configuration.getURL();////ActiveMQConnection.DEFAULT_BROKER_URL;//"tcp://localhost:61616";
+        messageBrokerUrl = Constant.configuration.getURL();////ActiveMQConnection.DEFAULT_BROKER_URL;//"tcp://localhost:61616";
       //  messageBrokerUrl ="tcp://localhost:61616";
         ackMode = Session.AUTO_ACKNOWLEDGE;
 
@@ -51,7 +51,7 @@ public class Operator{
         try {
             ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(messageBrokerUrl);
             connection = connectionFactory.createConnection();
-            connection.setClientID(subscriptionName);
+            connection.setClientID(Constant.getRandomString());
             boolean transacted = false;
             session =connection.createSession(transacted, ackMode);
 

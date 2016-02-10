@@ -1,5 +1,7 @@
 package Model;
 
+import Controller.ConfigurationController;
+
 import java.util.Random;
 
 /**
@@ -13,7 +15,7 @@ public class Constant {
     public static String correalationID = "60e232e2a20efb61";
     public static final String JMSmessageID = "60e232e2a20tef54";
 
-    
+    public static Configuration configuration = ConfigurationController.readConfig();
 
     public static final String exitMessage ="DIRROUTETOBOT";
     public static final String exitUserMessage ="DIRDISCONNECT";
