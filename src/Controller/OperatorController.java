@@ -47,7 +47,7 @@ public class OperatorController implements MessageListener {
     private boolean isClosedAlready;
     private static ChatMessage chatMessage;
     private  JSONFormatController jsonFormatController;
-
+    private  PostRequestController postRequestController;
     private boolean isReceived;
 
 
@@ -291,8 +291,8 @@ public class OperatorController implements MessageListener {
                 messageText = jsoNmessage[0];
                 String owner = jsoNmessage[1];
 
-                if(messageText.contains(Constant.DO_NOT_TRAIN_TAG)){
-                   messageText= messageText.replace(Constant.DO_NOT_TRAIN_TAG,"");
+                if(postRequestController!=null){
+                   messageText =postRequestController.evaluateResponse(messageText);
 
                 }
                 System.out.println("Recieving......:      "+messageText);
@@ -338,8 +338,9 @@ public class OperatorController implements MessageListener {
                     correlationID = message.getJMSCorrelationID();
          //       System.out.println(messageText);
 
-                if(messageText.contains(Constant.DO_NOT_TRAIN_TAG)){
-                    messageText= messageText.replace(Constant.DO_NOT_TRAIN_TAG,"");
+                if(postRequestController!=null){
+                    messageText =postRequestController.evaluateResponse(messageText);
+
                 }
 
                 System.out.println("Recieving... byte...:      "+messageText);
@@ -472,6 +473,7 @@ public class OperatorController implements MessageListener {
 
                                     if (!correID.equalsIgnoreCase(Constant.correalationID)) {
                                         if (!chatMessage.getTextMessage().equals(Constant.exitMessage)) {
+
                                             UserBubble bubble = new UserBubble(chatMessage.getOwner(), chatMessage.getTextMessage(), chatMessage.getTime());
                                             controller.chatHolder.addRow(controller.getIDtracker(), bubble.getRoot());
 
@@ -482,16 +484,17 @@ public class OperatorController implements MessageListener {
                                                 chatMessage.setTextMessage(Constant.exitBubbleMessage);
 
                                             }
+
                                             OperatorBubble bubble = new OperatorBubble(chatMessage.getOwner(), chatMessage.getTextMessage(), chatMessage.getTime());
                                             controller.chatHolder.addRow(controller.getIDtracker(), bubble.getRoot());
 
                                             //    GridPane.setHalignment(bubble.getFromBubble(), HPos.RIGHT);
 
 
-                                             Platform.runLater(() -> controller.messageDisplay.setVvalue(controller.messageDisplay.getVmax()));
+
                                         }
 
-
+                                        Platform.runLater(() -> controller.messageDisplay.setVvalue(controller.messageDisplay.getVmax()));
                                     }
 
 //                                else {
@@ -525,6 +528,13 @@ public class OperatorController implements MessageListener {
 
     }
 
+    public PostRequestController getPostRequestController() {
+        return postRequestController;
+    }
+
+    public void setPostRequestController(PostRequestController postRequestController) {
+        this.postRequestController = postRequestController;
+    }
 
     public int getMessageCounter() {
         operatorController.messageCounter = operatorController.messageCounter+1;

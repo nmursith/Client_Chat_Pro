@@ -1,8 +1,15 @@
 package Controller;
 
+import Model.ChatMessage;
 import Model.Constant;
+import Model.UserBubble;
+import javafx.application.Platform;
 
-import java.io.*;
+import javax.jms.JMSException;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -10,9 +17,20 @@ import java.net.URL;
  * Created by mmursith on 2/10/2016.
  */
 public class PostRequestController {
-    public static int state;
-
-    public static void main(String[]args){
+    public int state;
+    public OperatorController operatorController;
+    public ChatController chatController;
+    public PostRequestController(ChatController controller){
+        try {
+            operatorController = new OperatorController("USER", "chat."+Constant.getRandomString(), controller);
+            operatorController.setPostRequestController(this);
+            chatController = controller;
+            state = 0;
+        } catch (JMSException e) {
+            e.printStackTrace();
+        }
+    }
+    public  void main(String[]args){
         try {
 
             System.out.println("RESOASDFAD:   "+SendMessageAI("what is insightlive?"));
@@ -25,10 +43,76 @@ public class PostRequestController {
         }
     }
 
+    public void routeMessage(String usermessage) throws IOException {
+
+        //String message = evaluateResponse(usermessage);
+
+        if (usermessage.trim() == "") {
+            System.out.println("[BOTConsole] sayChat: ERROR nothing to send");
+        } else {
+            if (state == 0) {
+                //Add send chat bubble, send the request and clear text box
+
+                try {
+                    String msg = SendMessageAIML(usermessage);
+                    msg = evaluateResponse(msg);
+
+                    UserBubble bubble = new UserBubble("AIML",msg, "S" );
+                    chatController.chatHolder.addRow(chatController.getIDtracker(), bubble.getRoot());
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else if (state == 1) {
+                //Add send chat bubble, send the request and clear text box
+
+                String msg = SendMessageAI(usermessage);
+                msg = evaluateResponse(msg);
+
+             /*   if (state == 0) {
+                    msg=SendMessageAIML(usermessage);
+                    // return;
+                } else if (state == 2) {
+                    sendChatOperator(msg);
+                    //There is not state change from 0 to 2
+                    System.out.println("[BOTConsole] sendDirectivetoBot: ERROR state change from 0 to 2");
+                }
+                state = 0;*/
+
+                UserBubble bubble = new UserBubble("AI",msg, "S" );
+                chatController.chatHolder.addRow(chatController.getIDtracker(), bubble.getRoot());
+
+            } else if (state == 2) {
+
+                sendChatOperator(usermessage);
+
+            }
 
 
+            Platform.runLater(() -> {
+                chatController.messageDisplay.setVvalue(chatController.messageDisplay.getVmax());
+                /////////
+            });
 
-    public static String SendMessageAI(String message) throws IOException {
+        }
+
+    }
+
+    private  void sendChatOperator(String usermessage) {
+        if(!operatorController.isClosedAlready()){
+            operatorController.createSession();
+            operatorController.startDefaultOperatorAction();
+
+        }
+        try {
+            ChatMessage chatMessage = getObjectMessage(usermessage);
+            operatorController.sendMessage(chatMessage,operatorController);
+        } catch (JMSException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public  String SendMessageAI(String message) throws IOException {
 
         String POST_URL = Constant.AI_URL;
         URL obj = new URL(POST_URL);
@@ -69,13 +153,13 @@ public class PostRequestController {
         in.close();
 
         //print result
-    //    System.out.println(response.toString());
+        System.out.println(response.toString());
 
         return evaluateResponse(response.toString());
 
     }
 
-    public static String SendMessageAIML(String message) throws IOException {
+    public  String SendMessageAIML(String message) throws IOException {
         String POST_URL = Constant.AIML_URL;
         URL obj = new URL(POST_URL);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -115,13 +199,14 @@ public class PostRequestController {
         in.close();
 
         //print result
-        //System.out.println(response.toString());
+
         String AIML = JSONFormatController.AIMLreadJSON(response.toString());
+        System.out.println(AIML);
         return evaluateResponse(AIML);
 
     }
 
-    public static String evaluateResponse(String msg){
+    public  String evaluateResponse(String msg){
 
         if (msg.indexOf("DIRROUTETOBOT") > -1) {
 
@@ -129,7 +214,7 @@ public class PostRequestController {
             if (state == 2) {
                 //Change state
                 state = 0;
-
+                operatorController.closeConnection();
                 //destination = '/topic/chat.';
             }
 
@@ -146,7 +231,7 @@ public class PostRequestController {
 
             System.out.println("[BOTConsole] evaluateResponse: State change to 1(AI)");
             //Change state
-            state = 1;
+            state = 0;
 
             //Remove directive
             return msg.replace("DIRROUTETOAI", "");
@@ -197,7 +282,11 @@ public class PostRequestController {
         }
     }
 
-
+    public ChatMessage getObjectMessage(String messageText){
+        ChatMessage chatMessage =  new ChatMessage();
+        chatMessage.setTextMessage(messageText);
+        return chatMessage;
+    }
 
 
 

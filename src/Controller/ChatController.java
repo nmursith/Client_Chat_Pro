@@ -1,6 +1,5 @@
 package Controller;
 
-import Model.ChatMessage;
 import Model.Constant;
 import Model.OperatorBubble;
 import Model.UserBubble;
@@ -24,22 +23,23 @@ public class ChatController {
     public GridPane chatHolder;
     public int IDtracker;
     public ChatController controller;
-    public int state;
-    public OperatorController operatorController;
+    public PostRequestController postRequestController;
+
 
     public ChatController() throws JMSException {
         chatHolder = getGridPane();
         IDtracker = 0;
-        state = PostRequestController.state;
-        operatorController = new OperatorController("USER", "chat.USER", this);
+
+
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 messageDisplay.setContent(chatHolder);
                 messageDisplay.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
                 String message= null;
+                postRequestController = new PostRequestController(getInstance());
                 try {
-                    message = PostRequestController.SendMessageAIML(Constant.DIRDEVELOPERSTART);
+                    message = postRequestController.SendMessageAIML(Constant.DIRDEVELOPERSTART);
                     UserBubble bubble = new UserBubble("BOT",message, "S" );
                     chatHolder.addRow(getIDtracker(), bubble.getRoot());
                 } catch (IOException e) {
@@ -56,7 +56,11 @@ public class ChatController {
     }
 
     public void sendMessage(ActionEvent actionEvent) {
-
+        try {
+            sendMessage();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -72,7 +76,7 @@ public class ChatController {
         gridPane.setVgap(7);
         ColumnConstraints c1 = new ColumnConstraints();
 
-        c1.setPercentWidth(100);
+        c1.setPercentWidth(95);
         gridPane.getColumnConstraints().add(c1);
 
         return gridPane;
@@ -91,7 +95,6 @@ public class ChatController {
         String enteredmessage = messageTextField.getText();
         messageTextField.clear();
 
-
         try {
 
             OperatorBubble bubble = new OperatorBubble("USER",enteredmessage, "S" );
@@ -107,8 +110,7 @@ public class ChatController {
             state = PostRequestController.state;
 
            if(!message.equals("")){
-               UserBubble bubble = new UserBubble("BOT",message, "S" );
-               chatHolder.addRow(getIDtracker(), bubble.getRoot());
+
                Platform.runLater(() -> {
                    messageDisplay.setVvalue(messageDisplay.getVmax());
                    /////////
@@ -119,29 +121,11 @@ public class ChatController {
             e.printStackTrace();
         }*/
 
-        if(!operatorController.isClosedAlready()){
-            operatorController.createSession();
-            operatorController.startDefaultOperatorAction();
 
-        }
-        try {
-            ChatMessage chatMessage = getObjectMessage(enteredmessage);
-            operatorController.sendMessage(chatMessage,operatorController);
-        } catch (JMSException e) {
-            e.printStackTrace();
-        }
-
-        Platform.runLater(() -> {
-            messageDisplay.setVvalue(messageDisplay.getVmax());
-            /////////
-        });
+        postRequestController.routeMessage(enteredmessage);
     }
 
-    public ChatMessage getObjectMessage(String messageText){
-        ChatMessage chatMessage =  new ChatMessage();
-        chatMessage.setTextMessage(messageText);
-        return chatMessage;
-    }
+
 
     public synchronized ChatController getInstance(){
         if(controller==null){
