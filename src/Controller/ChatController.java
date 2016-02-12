@@ -2,7 +2,6 @@ package Controller;
 
 import Model.Constant;
 import Model.OperatorBubble;
-import Model.UserBubble;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -39,9 +38,8 @@ public class ChatController {
                 String message= null;
                 postRequestController = new PostRequestController(getInstance());
                 try {
-                    message = postRequestController.SendMessageAIML(Constant.DIRDEVELOPERSTART);
-                    UserBubble bubble = new UserBubble("BOT",message, "S" );
-                    chatHolder.addRow(getIDtracker(), bubble.getRoot());
+                    postRequestController.SendMessageAIML(Constant.DIRDEVELOPERSTART);
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

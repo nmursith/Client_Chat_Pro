@@ -51,7 +51,7 @@ public class Operator{
         try {
             ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(messageBrokerUrl);
             connection = connectionFactory.createConnection();
-            connection.setClientID(Constant.getRandomString());
+            connection.setClientID(subscriptionName);
             boolean transacted = false;
             session =connection.createSession(transacted, ackMode);
 

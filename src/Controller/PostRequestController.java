@@ -31,16 +31,17 @@ public class PostRequestController {
         }
     }
     public  void main(String[]args){
-        try {
-
-            System.out.println("RESOASDFAD:   "+SendMessageAI("what is insightlive?"));
-            System.out.println("RESOASDFAD:   "+SendMessageAIML("can you take me to the beacon?"));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//
+//
+//              System.out.println("RESOASDFAD:   "+SendMessageAI("what is insightlive?"));
+//            System.out.println("RESOASDFAD:   "+SendMessageAIML("can you take me to the beacon?"));
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     public void routeMessage(String usermessage) throws IOException {
@@ -54,11 +55,11 @@ public class PostRequestController {
                 //Add send chat bubble, send the request and clear text box
 
                 try {
-                    String msg = SendMessageAIML(usermessage);
-                    msg = evaluateResponse(msg);
+                    SendMessageAIML(usermessage);
+                //    msg = evaluateResponse(msg);
 
-                    UserBubble bubble = new UserBubble("AIML",msg, "S" );
-                    chatController.chatHolder.addRow(chatController.getIDtracker(), bubble.getRoot());
+//                    UserBubble bubble = new UserBubble("AIML",msg, "S" );
+//                    chatController.chatHolder.addRow(chatController.getIDtracker(), bubble.getRoot());
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -66,8 +67,9 @@ public class PostRequestController {
             } else if (state == 1) {
                 //Add send chat bubble, send the request and clear text box
 
-                String msg = SendMessageAI(usermessage);
-                msg = evaluateResponse(msg);
+                SendMessageAI(usermessage);
+                //state=0;
+///                msg = evaluateResponse(msg);
 
              /*   if (state == 0) {
                     msg=SendMessageAIML(usermessage);
@@ -79,8 +81,8 @@ public class PostRequestController {
                 }
                 state = 0;*/
 
-                UserBubble bubble = new UserBubble("AI",msg, "S" );
-                chatController.chatHolder.addRow(chatController.getIDtracker(), bubble.getRoot());
+//                UserBubble bubble = new UserBubble("AI",msg, "S" );
+//                chatController.chatHolder.addRow(chatController.getIDtracker(), bubble.getRoot());
 
             } else if (state == 2) {
 
@@ -112,7 +114,7 @@ public class PostRequestController {
         }
     }
 
-    public  String SendMessageAI(String message) throws IOException {
+    public  void SendMessageAI(String message) throws IOException {
 
         String POST_URL = Constant.AI_URL;
         URL obj = new URL(POST_URL);
@@ -155,11 +157,33 @@ public class PostRequestController {
         //print result
         System.out.println(response.toString());
 
-        return evaluateResponse(response.toString());
+        String res=  evaluateResponse(response.toString());
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if(state==1){
+                    UserBubble bubble = null;
+                    try {
+                        bubble = new UserBubble("AI",res, "S" );
+                        chatController.chatHolder.addRow(chatController.getIDtracker(), bubble.getRoot());
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    state = 0;
+                }
+                else if(state==2){
+                    sendChatOperator(message);
+                    //return;
+
+                }
+            }
+        });
 
     }
 
-    public  String SendMessageAIML(String message) throws IOException {
+    public  void SendMessageAIML(String message) throws IOException {
         String POST_URL = Constant.AIML_URL;
         URL obj = new URL(POST_URL);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -202,7 +226,33 @@ public class PostRequestController {
 
         String AIML = JSONFormatController.AIMLreadJSON(response.toString());
         System.out.println(AIML);
-        return evaluateResponse(AIML);
+
+        String res =  evaluateResponse(AIML);
+
+        Platform.runLater(() -> {
+            if(state==1){
+                try {
+                    SendMessageAI(message);
+                    System.out.println("SENDING AI");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else if(state==0){
+                UserBubble bubble = null;
+                try {
+                    bubble = new UserBubble("AIMIL",res, "S" );
+                    chatController.chatHolder.addRow(chatController.getIDtracker(), bubble.getRoot());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+            else if(state ==2){
+                System.out.println("[BOTConsole] ERROR AIML");
+                return;
+            }
+        });
 
     }
 
@@ -228,10 +278,10 @@ public class PostRequestController {
             return msg.replace("DIRDONOTTRAIN", "");
 
         } else if (msg.indexOf("DIRROUTETOAI") > -1) {
-
-            System.out.println("[BOTConsole] evaluateResponse: State change to 1(AI)");
+            state = 1;
+            System.out.println("[BOTConsole] evaluateResponse: State change to 1(AI)" + state);
             //Change state
-            state = 0;
+
 
             //Remove directive
             return msg.replace("DIRROUTETOAI", "");
@@ -265,10 +315,6 @@ public class PostRequestController {
 
         } else if (msg.indexOf("DIROPENBEACON") > -1) {
 
-            //Fire event to open introduced violations
-
-
-            //Remove directive
             return msg.replace("DIROPENBEACON", "");
 
         } else if (msg.indexOf("DIRDONOTHING") > -1) {
