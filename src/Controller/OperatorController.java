@@ -116,21 +116,13 @@ public class OperatorController implements MessageListener {
 
 
                 timer = new Timer();
-                TimerTask offlineModeTask = new TimerTask() {
+ /*               TimerTask offlineModeTask = new TimerTask() {
 
                     @Override
                     public void run() {
 
                        //                        System.out.println("Timer Working online :  "+ isOnline);
 
-                        if(operatorController.getSesssion()==null){
-                             System.out.println("Null session:  ");
-
-                                operatorController.setListener();
-                                System.out.println("Created session:  "+ operatorController.getSesssion());
-
-
-                        }
 
                         try {
                             //if(operatorController.getSesssion()!=null)
@@ -166,7 +158,7 @@ public class OperatorController implements MessageListener {
 
 
 
-                Platform.runLater(() -> timer.schedule(offlineModeTask, 500, 3000));
+                Platform.runLater(() -> timer.schedule(offlineModeTask, 500, 3000));*/
 
 
 
@@ -233,6 +225,7 @@ public class OperatorController implements MessageListener {
                     myMessage = myMessage.trim().equalsIgnoreCase("exit") ? "DIRROUTETOBOT":myMessage;
                     myMessage = jsonFormatController.createJSONmessage("NIFRAS",myMessage);
                     response.setText(myMessage);
+                    //System.out.println("offline:   "+myMessage);
                     //System.out.println("offline:   "+myMessage);
                     String random = null;
          //           String JMSmessageID = Constant.JMSmessageID;
@@ -367,7 +360,7 @@ public class OperatorController implements MessageListener {
             System.out.println(correlationID +"         PRODUCERID :  "+  producerID);
 
             if(correlationID==null){
-                System.out.println("Adding:  "+  producerID);
+
 
 
 
@@ -583,7 +576,10 @@ public class OperatorController implements MessageListener {
 
         try{
             setSessionCreated(false);
+
             operatorController.operator.closeConnection();
+            messageConsumer = null;
+            setSesssion(null);
             setClosedAlready(false);
 
         } catch (Exception e){
@@ -617,6 +613,9 @@ public class OperatorController implements MessageListener {
 
     protected Session getSesssion() {
         return operator.getSession();
+    }
+    protected void setSesssion(Session session) {
+                operator.setSession(null);
     }
 
     public static String getDefaultOperator() {

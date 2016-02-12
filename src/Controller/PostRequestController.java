@@ -22,7 +22,8 @@ public class PostRequestController {
     public ChatController chatController;
     public PostRequestController(ChatController controller){
         try {
-            operatorController = new OperatorController("USER", "chat."+Constant.getRandomString(), controller);
+            String ID = Constant.getRandomString();
+            operatorController = new OperatorController(ID, "chat."+ID, controller);
             operatorController.setPostRequestController(this);
             chatController = controller;
             state = 0;
@@ -167,7 +168,7 @@ public class PostRequestController {
                     try {
                         bubble = new UserBubble("AI",res, "S" );
                         chatController.chatHolder.addRow(chatController.getIDtracker(), bubble.getRoot());
-
+                        Platform.runLater(() -> chatController.messageDisplay.setVvalue(chatController.messageDisplay.getVmax()));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -243,6 +244,7 @@ public class PostRequestController {
                 try {
                     bubble = new UserBubble("AIMIL",res, "S" );
                     chatController.chatHolder.addRow(chatController.getIDtracker(), bubble.getRoot());
+                    Platform.runLater(() -> chatController.messageDisplay.setVvalue(chatController.messageDisplay.getVmax()));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

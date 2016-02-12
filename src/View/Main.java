@@ -38,6 +38,7 @@ public class Main extends Application {
 
 
         Scene scene = new Scene(root);
+        scene.getStylesheets().add(getClass().getResource("theme.css").toExternalForm());
         stage.setScene(scene);
         stage.initStyle(StageStyle.UNDECORATED);
 

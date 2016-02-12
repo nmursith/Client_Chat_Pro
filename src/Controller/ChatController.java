@@ -97,6 +97,7 @@ public class ChatController {
 
             OperatorBubble bubble = new OperatorBubble("USER",enteredmessage, "S" );
             chatHolder.addRow(getIDtracker(), bubble.getRoot());
+            Platform.runLater(() -> controller.messageDisplay.setVvalue(controller.messageDisplay.getVmax()));
         } catch (IOException e) {
             e.printStackTrace();
         }
