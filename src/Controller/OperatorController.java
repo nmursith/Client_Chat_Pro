@@ -680,6 +680,12 @@ public class OperatorController implements MessageListener {
         this.timer = timer;
     }
 
+    public ChatMessage getObjectMessage(String messageText){
+        ChatMessage chatMessage =  new ChatMessage();
+        chatMessage.setTextMessage(messageText);
+        return chatMessage;
+    }
+
     class OfflineNetworkDownHandler extends Thread{
 
 

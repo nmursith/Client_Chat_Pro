@@ -4,12 +4,14 @@ import Model.ChatMessage;
 import Model.Constant;
 import Model.UserBubble;
 import javafx.application.Platform;
+import javafx.scene.image.Image;
 
 import javax.jms.JMSException;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -20,6 +22,7 @@ public class PostRequestController {
     public int state;
     public OperatorController operatorController;
     public ChatController chatController;
+    Image botImage = new Image(getClass().getResourceAsStream("chat-icon-robot.png"));
     public PostRequestController(ChatController controller){
         try {
             String ID = Constant.getRandomString();
@@ -116,16 +119,16 @@ public class PostRequestController {
     }
 
     public  void SendMessageAI(String message) throws IOException {
-
+    try{
         String POST_URL = Constant.AI_URL;
         URL obj = new URL(POST_URL);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
         //add reuqest header
         con.setRequestMethod("POST");
-      //  con.setRequestProperty("User-Agent", USER_AGENT);
+        //  con.setRequestProperty("User-Agent", USER_AGENT);
         con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-    //    con.setRequestProperty("dataType", "json");
+        //    con.setRequestProperty("dataType", "json");
         con.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
         con.setRequestProperty("Access-Control-Allow-Origin","*");
         con.setRequestProperty("Access-Control-Allow-Methods","PUT, GET, POST, DELETE, OPTIONS");
@@ -141,8 +144,8 @@ public class PostRequestController {
         wr.close();
 
         int responseCode = con.getResponseCode();
-     //   System.out.println("\nSending 'POST' request to URL : " + POST_URL);
-       // System.out.println("Post parameters : " + urlParameters);
+        //   System.out.println("\nSending 'POST' request to URL : " + POST_URL);
+        // System.out.println("Post parameters : " + urlParameters);
         //System.out.println("Response Code : " + responseCode);
 
         BufferedReader in = new BufferedReader(
@@ -166,7 +169,9 @@ public class PostRequestController {
                 if(state==1){
                     UserBubble bubble = null;
                     try {
-                        bubble = new UserBubble("AI",res, "S" );
+                        ChatMessage chatMessage = getObjectMessage(res);
+                        bubble = new UserBubble("BOT",chatMessage.getTextMessage(), chatMessage.getTime() );
+                        bubble.setImage(botImage);
                         chatController.chatHolder.addRow(chatController.getIDtracker(), bubble.getRoot());
                         Platform.runLater(() -> chatController.messageDisplay.setVvalue(chatController.messageDisplay.getVmax()));
                     } catch (IOException e) {
@@ -181,10 +186,19 @@ public class PostRequestController {
                 }
             }
         });
+    }
+    catch (ConnectException e){
+        e.printStackTrace();
+    }
+    catch (Exception e){
+        e.printStackTrace();
+    }
+
 
     }
 
     public  void SendMessageAIML(String message) throws IOException {
+    try{
         String POST_URL = Constant.AIML_URL;
         URL obj = new URL(POST_URL);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -203,15 +217,16 @@ public class PostRequestController {
 
         // Send post request
         con.setDoOutput(true);
+
         DataOutputStream wr = new DataOutputStream(con.getOutputStream());
         wr.writeBytes(urlParameters);
         wr.flush();
         wr.close();
 
         int responseCode = con.getResponseCode();
-  //      System.out.println("\nSending 'POST' request to URL : " + POST_URL);
-   //     System.out.println("Post parameters : " + urlParameters);
-   //     System.out.println("Response Code : " + responseCode);
+        //      System.out.println("\nSending 'POST' request to URL : " + POST_URL);
+        //     System.out.println("Post parameters : " + urlParameters);
+        //     System.out.println("Response Code : " + responseCode);
 
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
@@ -242,7 +257,9 @@ public class PostRequestController {
             else if(state==0){
                 UserBubble bubble = null;
                 try {
-                    bubble = new UserBubble("AIMIL",res, "S" );
+                    ChatMessage chatMessage = getObjectMessage(res);
+                    bubble = new UserBubble("BOT",chatMessage.getTextMessage(), chatMessage.getTime() );
+                    bubble.setImage(botImage);
                     chatController.chatHolder.addRow(chatController.getIDtracker(), bubble.getRoot());
                     Platform.runLater(() -> chatController.messageDisplay.setVvalue(chatController.messageDisplay.getVmax()));
                 } catch (IOException e) {
@@ -255,6 +272,13 @@ public class PostRequestController {
                 return;
             }
         });
+        }
+    catch (ConnectException e){
+        return;
+    }
+    catch (Exception e){
+        return;
+    }
 
     }
 

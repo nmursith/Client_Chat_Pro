@@ -40,8 +40,9 @@
     -fx-background-color:derive(black,80%);
 	-fx-padding:1.5;
 	-fx-background-insets: 0, 0, 0;
-    	-fx-background-radius: 0em;
+    -fx-background-radius: 0em;
 	-fx-border-color:white;
 	-fx-border-width:0px;
 
 }
+

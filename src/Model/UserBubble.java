@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.scene.CacheHint;
 import javafx.scene.Parent;
+import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 
 import java.io.IOException;
@@ -41,7 +42,10 @@ public class UserBubble {
     }
 
 
+    public void setImage(Image image){
+        userBubbleController.setOperator_pic_image_view(image);
 
+    }
     public UserBubble() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("userbubble.fxml"));
         root = fxmlLoader.load();

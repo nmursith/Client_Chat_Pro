@@ -1,10 +1,12 @@
 package Controller;
 
+import Model.ChatMessage;
 import Model.Constant;
 import Model.OperatorBubble;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
@@ -23,7 +25,7 @@ public class ChatController {
     public int IDtracker;
     public ChatController controller;
     public PostRequestController postRequestController;
-
+    public Button sendButton;
 
     public ChatController() throws JMSException {
         chatHolder = getGridPane();
@@ -35,6 +37,7 @@ public class ChatController {
             public void run() {
                 messageDisplay.setContent(chatHolder);
                 messageDisplay.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+                messageDisplay.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
                 String message= null;
                 postRequestController = new PostRequestController(getInstance());
                 try {
@@ -72,9 +75,10 @@ public class ChatController {
         gridPane.setMaxWidth(width);
         gridPane.setPrefHeight(507);
         gridPane.setVgap(7);
+        gridPane.setStyle("-fx-background-color:#174172;-fx-border-color:#174172; -fx-padding:0em;");
         ColumnConstraints c1 = new ColumnConstraints();
 
-        c1.setPercentWidth(95);
+        c1.setPercentWidth(98);
         gridPane.getColumnConstraints().add(c1);
 
         return gridPane;
@@ -94,8 +98,9 @@ public class ChatController {
         messageTextField.clear();
 
         try {
+            ChatMessage chatMessage = getObjectMessage(enteredmessage);
 
-            OperatorBubble bubble = new OperatorBubble("USER",enteredmessage, "S" );
+            OperatorBubble bubble = new OperatorBubble("USER",chatMessage.getTextMessage(), chatMessage.getTime() );
             chatHolder.addRow(getIDtracker(), bubble.getRoot());
             Platform.runLater(() -> controller.messageDisplay.setVvalue(controller.messageDisplay.getVmax()));
         } catch (IOException e) {
@@ -124,7 +129,11 @@ public class ChatController {
         postRequestController.routeMessage(enteredmessage);
     }
 
-
+    public ChatMessage getObjectMessage(String messageText){
+        ChatMessage chatMessage =  new ChatMessage();
+        chatMessage.setTextMessage(messageText);
+        return chatMessage;
+    }
 
     public synchronized ChatController getInstance(){
         if(controller==null){
@@ -138,5 +147,42 @@ public class ChatController {
     }
     public Stage getStage(){
         return  null;
+    }
+
+    public void ToggleBackgroundColor(Event event) {
+    }
+
+    public void ToggleBackgroundWhite(Event event) {
+        messageTextField.setVisible(true);
+        sendButton.setVisible(true);
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                messageDisplay.setPrefHeight(507);
+                messageDisplay.setFitToHeight(true);
+                messageDisplay.setVvalue(messageDisplay.getVmax());
+            }
+        });
+
+        //messageTextField.setStyle("-fx-control-inner-background:white;-fx-padding:0em;");
+    }
+
+    public void ToggleBackgroundBlue(Event event) {
+        messageTextField.setVisible(false);
+        sendButton.setVisible(false);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                messageDisplay.setPrefHeight(650);
+                messageDisplay.setFitToHeight(true);
+                messageDisplay.setVvalue(messageDisplay.getVmax());
+            }
+        });
+        //messageTextField.setStyle("-fx-background-color:#174172;");
+//        messageTextField.setStyle("-fx-control-inner-background:#174172;-fx-padding:0em;");
+
+
+
     }
 }
