@@ -16,7 +16,7 @@ public class Constant {
     public static final String JMSmessageID = "60e232e2a20tef54";
 
     public static Configuration configuration = ConfigurationController.readConfig();
-
+    public static String USERNAME = System.getProperty("user.name");
     public static final String exitMessage ="DIRROUTETOBOT";
     public static final String exitUserMessage ="DIRDISCONNECT";
     public static final String  exitBubbleMessage = "Chat closed by Operator";

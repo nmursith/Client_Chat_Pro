@@ -4,6 +4,7 @@ import Model.ChatMessage;
 import Model.Constant;
 import Model.UserBubble;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.scene.image.Image;
 
 import javax.jms.JMSException;
@@ -90,7 +91,12 @@ public class PostRequestController {
 
             } else if (state == 2) {
 
-                sendChatOperator(usermessage);
+
+
+                    sendChatOperator(usermessage);
+
+                if(usermessage.equals(Constant.exitUserMessage))
+                         evaluateResponse(usermessage);
 
             }
 
@@ -105,17 +111,31 @@ public class PostRequestController {
     }
 
     private  void sendChatOperator(String usermessage) {
-        if(!operatorController.isClosedAlready()){
-            operatorController.createSession();
-            operatorController.startDefaultOperatorAction();
 
-        }
-        try {
-            ChatMessage chatMessage = getObjectMessage(usermessage);
-            operatorController.sendMessage(chatMessage,operatorController);
-        } catch (JMSException e) {
-            e.printStackTrace();
-        }
+        Task<Void> task = new Task<Void>() {
+            @Override protected Void call() throws Exception {
+                Platform.runLater(() -> {
+                    if(!operatorController.isClosedAlready()){
+                        operatorController.createSession();
+                        operatorController.startDefaultOperatorAction();
+
+                    }
+                    try {
+                        ChatMessage chatMessage = getObjectMessage(usermessage);
+                        operatorController.sendMessage(chatMessage,operatorController);
+                    } catch (JMSException e) {
+                        e.printStackTrace();
+                    }
+
+                });
+                return null;
+            }
+        };
+
+        Platform.runLater(task);
+
+
+
     }
 
     public  void SendMessageAI(String message) throws IOException {
@@ -161,7 +181,7 @@ public class PostRequestController {
         //print result
         System.out.println(response.toString());
 
-        String res=  evaluateResponse(response.toString());
+        String res=  constructResponse(evaluateResponse(response.toString()));
 
         Platform.runLater(new Runnable() {
             @Override
@@ -180,6 +200,7 @@ public class PostRequestController {
                     state = 0;
                 }
                 else if(state==2){
+
                     sendChatOperator(message);
                     //return;
 
@@ -243,7 +264,7 @@ public class PostRequestController {
         String AIML = JSONFormatController.AIMLreadJSON(response.toString());
         System.out.println(AIML);
 
-        String res =  evaluateResponse(AIML);
+        String res=  constructResponse(evaluateResponse(AIML));
 
         Platform.runLater(() -> {
             if(state==1){
@@ -284,13 +305,16 @@ public class PostRequestController {
 
     public  String evaluateResponse(String msg){
 
-        if (msg.indexOf("DIRROUTETOBOT") > -1) {
+        if (msg.indexOf("DIRROUTETOBOT") > -1 || msg.indexOf(Constant.exitUserMessage) > -1) {
 
            System.out.println("[BOTConsole] evaluateResponse: State change to 0(BOT)");
             if (state == 2) {
                 //Change state
                 state = 0;
                 operatorController.closeConnection();
+                operatorController.getTimer().cancel();
+                Platform.runLater(() -> chatController.disconnectButton.setVisible(false));
+
                 //destination = '/topic/chat.';
             }
 
@@ -316,7 +340,7 @@ public class PostRequestController {
 
             String replace = "";
             state =2;
-
+            Platform.runLater(() -> chatController.disconnectButton.setVisible(true));
             return msg.replace("DIRROUTETOOPERATOR", replace); //.replace("DIRROUTETOOPERATOR", "");
 
 
@@ -360,7 +384,11 @@ public class PostRequestController {
         return chatMessage;
     }
 
+    public String constructResponse(String msg){
+        String username =    System.getProperty("user.name");
 
+        return msg.replace("VARUSERNAME", username);
+    }
 
 
 

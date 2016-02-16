@@ -4,6 +4,7 @@ import Model.ChatMessage;
 import Model.Constant;
 import Model.OperatorBubble;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.scene.control.Button;
@@ -26,10 +27,16 @@ public class ChatController {
     public ChatController controller;
     public PostRequestController postRequestController;
     public Button sendButton;
+    public Button disconnectButton;
+
+
+    protected  Stage primaryStage;
 
     public ChatController() throws JMSException {
         chatHolder = getGridPane();
         IDtracker = 0;
+
+
 
 
         Platform.runLater(new Runnable() {
@@ -57,6 +64,7 @@ public class ChatController {
     }
 
     public void sendMessage(ActionEvent actionEvent) {
+
         try {
             sendMessage();
         } catch (IOException e) {
@@ -75,7 +83,7 @@ public class ChatController {
         gridPane.setMaxWidth(width);
         gridPane.setPrefHeight(507);
         gridPane.setVgap(7);
-        gridPane.setStyle("-fx-background-color:#174172;-fx-border-color:#174172; -fx-padding:0em;");
+        gridPane.setStyle("-fx-background-color:#1F3C92;-fx-border-color:#1F3C92; -fx-padding:0em;");
         ColumnConstraints c1 = new ColumnConstraints();
 
         c1.setPercentWidth(98);
@@ -94,18 +102,31 @@ public class ChatController {
     }
 
     private void sendMessage() throws IOException {
-        String enteredmessage = messageTextField.getText();
-        messageTextField.clear();
 
-        try {
-            ChatMessage chatMessage = getObjectMessage(enteredmessage);
 
-            OperatorBubble bubble = new OperatorBubble("USER",chatMessage.getTextMessage(), chatMessage.getTime() );
-            chatHolder.addRow(getIDtracker(), bubble.getRoot());
-            Platform.runLater(() -> controller.messageDisplay.setVvalue(controller.messageDisplay.getVmax()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Task<Void> task = new Task<Void>() {
+            @Override protected Void call() throws Exception {
+                Platform.runLater(() -> {
+
+                    String enteredmessage = messageTextField.getText();
+                    messageTextField.clear();
+
+                    try {
+                        ChatMessage chatMessage = getObjectMessage(enteredmessage);
+
+                        OperatorBubble bubble = new OperatorBubble(Constant.USERNAME,chatMessage.getTextMessage(), chatMessage.getTime() );
+                        chatHolder.addRow(getIDtracker(), bubble.getRoot());
+                        Platform.runLater(() -> controller.messageDisplay.setVvalue(controller.messageDisplay.getVmax()));
+                        postRequestController.routeMessage(enteredmessage);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                return null;
+            }
+        };
+
+        Platform.runLater(task);
 
 /*        try {
             //Thread.sleep(1000);
@@ -126,7 +147,7 @@ public class ChatController {
         }*/
 
 
-        postRequestController.routeMessage(enteredmessage);
+
     }
 
     public ChatMessage getObjectMessage(String messageText){
@@ -149,17 +170,14 @@ public class ChatController {
         return  null;
     }
 
-    public void ToggleBackgroundColor(Event event) {
-    }
+
 
     public void ToggleBackgroundWhite(Event event) {
-        messageTextField.setVisible(true);
-        sendButton.setVisible(true);
 
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                messageDisplay.setPrefHeight(507);
+                messageDisplay.setPrefHeight(650);
                 messageDisplay.setFitToHeight(true);
                 messageDisplay.setVvalue(messageDisplay.getVmax());
             }
@@ -169,11 +187,16 @@ public class ChatController {
     }
 
     public void ToggleBackgroundBlue(Event event) {
-        messageTextField.setVisible(false);
-        sendButton.setVisible(false);
+
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
+                //primaryStage.setIconified(true);
+                //primaryStage.hide();
+                messageTextField.setVisible(false);
+                sendButton.setVisible(false);
+                disconnectButton.setVisible(false);
+
                 messageDisplay.setPrefHeight(650);
                 messageDisplay.setFitToHeight(true);
                 messageDisplay.setVvalue(messageDisplay.getVmax());
@@ -184,5 +207,64 @@ public class ChatController {
 
 
 
+    }
+    public Stage getPrimaryStage() {
+        return primaryStage;
+    }
+
+    public void setPrimaryStage(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+    }
+
+    public void disconnectChat(ActionEvent actionEvent) {
+        try {
+            postRequestController.routeMessage(Constant.exitUserMessage);
+            ChatMessage chatMessage = getObjectMessage("Chat Closed By User");
+
+            OperatorBubble bubble = new OperatorBubble(Constant.USERNAME,chatMessage.getTextMessage(), chatMessage.getTime() );
+            chatHolder.addRow(getIDtracker(), bubble.getRoot());
+
+            disconnectButton.setVisible(false);
+            Platform.runLater(() -> controller.messageDisplay.setVvalue(controller.messageDisplay.getVmax()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void ShowComponents(Event event) {
+
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                messageTextField.setVisible(true);
+                sendButton.setVisible(true);
+
+                if(postRequestController.state==2)
+                    disconnectButton.setVisible(true);
+
+                messageDisplay.setPrefHeight(507);
+                messageDisplay.setFitToHeight(true);
+                messageDisplay.setVvalue(messageDisplay.getVmax());
+            }
+        });
+    //    System.out.println("EEEEEEEEEEEEE");
+    }
+
+    public void HideComponents(Event event) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                messageTextField.setVisible(false);
+                sendButton.setVisible(false);
+
+                //if(postRequestController.state==2)
+                    disconnectButton.setVisible(false);
+
+                messageDisplay.setPrefHeight(650);
+                messageDisplay.setFitToHeight(true);
+                messageDisplay.setVvalue(messageDisplay.getVmax());
+            }
+        });
     }
 }

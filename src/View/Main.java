@@ -1,40 +1,33 @@
 package View;
 
 import Controller.ChatController;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.value.WritableValue;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.CacheHint;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
-import javafx.util.Duration;
 
+import java.awt.*;
 import java.io.IOException;
 
 public class Main extends Application {
+    private Stage stage;
+
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage primarystage) throws IOException {
 
-
-
+        stage = primarystage;
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Client.fxml"));
         Parent root = fxmlLoader.load();
 
         root.setCache(true);
         root.setCacheHint(CacheHint.DEFAULT);
-        stage.setTitle("Main");
-
+        stage.setTitle("vAssistant");
+      //  check();
 
 
         Scene scene = new Scene(root);
@@ -42,7 +35,27 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.initStyle(StageStyle.UNDECORATED);
 
-        Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
+        stage.show();
+        stage.setX(0);
+
+//        stage.initModality(Modality.WINDOW_MODAL);
+        ChatController chatController = fxmlLoader.<ChatController>getController();
+        System.out.println("ChatController Started");
+
+        chatController.setPrimaryStage(stage);
+        stage.setIconified(false);
+        stage.requestFocus();
+
+//
+//        scene.addEventFilter(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent mouseEvent) {
+//                System.out.println("mouse click detected! " + mouseEvent.getSource());
+//            }
+//        });
+
+
+/*        Rectangle2D primScreenBounds = Screen.getPrimary().getVisualBounds();
         //double screenRightEdge = primScreenBounds.getMaxX();
         double screenLeftEdge = primScreenBounds.getMinX();
         System.out.println(screenLeftEdge-400);
@@ -54,10 +67,7 @@ public class Main extends Application {
         stage.setWidth(0);
         stage.setHeight(primScreenBounds.getHeight());
 
-        ChatController chatController = fxmlLoader.<ChatController>getController();
-        System.out.println("ChatController Started");
-        stage.show();
-        //chatController.setStage(primaryStage);
+       
 
         Timeline timeline = new Timeline();
 
@@ -89,10 +99,80 @@ public class Main extends Application {
                 timeline.play();
                 event.consume();
             }
-        });
+        });*/
+
+            new MouseHandler().start();
+    }
+
+    public void SlideLTR(){
+
+
+    }
+    public void SlideRTL(){
+
     }
 
     public static void main(String[] args) {
+
+
         launch(args);
+    }
+
+    class MouseHandler extends Thread{
+
+        Thread thread = this;
+        volatile boolean isRunning = true;
+        double X;
+        public void run() {
+            thread = Thread.currentThread();
+            isRunning = true;
+
+            //Constant.getRandomString();
+
+            while(isRunning ){
+                //   System.out.println("network thread   "+isRunning);
+                //System.out.println("Im running");
+                X = MouseInfo.getPointerInfo().getLocation().getX();
+
+                if(X==0){
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            stage.setIconified(false);
+                            stage.requestFocus();
+
+                        }
+                    });
+                }
+                else if(X>400){
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            stage.setIconified(true);
+                            //stage.requestFocus();
+
+                        }
+                    });
+                }
+                //System.out.println(X);
+
+                try {
+                    thread.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+
+//            stopThread();
+            }
+        }
+
+        public  void stopThread(){
+
+            isRunning = false;
+            //Thread t = thread;
+            thread = null;
+            //t.interrupt();
+        }
     }
 }

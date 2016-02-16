@@ -116,7 +116,7 @@ public class OperatorController implements MessageListener {
 
 
                 timer = new Timer();
- /*               TimerTask offlineModeTask = new TimerTask() {
+                TimerTask offlineModeTask = new TimerTask() {
 
                     @Override
                     public void run() {
@@ -125,8 +125,9 @@ public class OperatorController implements MessageListener {
 
 
                         try {
-                            //if(operatorController.getSesssion()!=null)
-                                operatorController.getSesssion().createTextMessage();
+                            if(operatorController.getSesssion()==null)
+                                operatorController.createSession();
+                           operatorController.getSesssion().createTextMessage();
                         }
                         catch ( JMSException e){
 
@@ -158,7 +159,7 @@ public class OperatorController implements MessageListener {
 
 
 
-                Platform.runLater(() -> timer.schedule(offlineModeTask, 500, 3000));*/
+                Platform.runLater(() -> timer.schedule(offlineModeTask, 500, 3000));
 
 
 
@@ -223,7 +224,7 @@ public class OperatorController implements MessageListener {
                     String myMessage = chatMessage.getTextMessage();
                     //System.out.println("message: "+ myMessage);
                     myMessage = myMessage.trim().equalsIgnoreCase("exit") ? "DIRROUTETOBOT":myMessage;
-                    myMessage = jsonFormatController.createJSONmessage("NIFRAS",myMessage);
+                    myMessage = jsonFormatController.createJSONmessage(Constant.USERNAME,myMessage);
                     response.setText(myMessage);
                     //System.out.println("offline:   "+myMessage);
                     //System.out.println("offline:   "+myMessage);
@@ -619,7 +620,7 @@ public class OperatorController implements MessageListener {
     }
 
     public static String getDefaultOperator() {
-        return "NIFRAS";
+        return Constant.USERNAME;
     }
 
     private MessageProducer getMessageProducer() {
