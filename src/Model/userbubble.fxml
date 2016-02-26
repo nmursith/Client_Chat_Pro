@@ -14,7 +14,7 @@
 <AnchorPane fx:id="chat_block_pane" maxWidth="335.0" minWidth="335.0" prefHeight="77.0" prefWidth="335.0" style="-fx-background-color: transparent; -fx-background-radius: 5px;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.UserBubbleController">
    <children>
        <Label fx:id="bubble_triangle_label" layoutX="42.0" layoutY="5.0" prefHeight="29.0" prefWidth="25.0" rotate="45.0" style="-fx-background-color: white;" visible="false" />
-       <GridPane fx:id="chat_bubble_pane" layoutX="36.0" maxWidth="298.0" minWidth="298.0" prefWidth="298.0" style="-fx-background-color: #609259; -fx-background-radius: 0 15 15 15;">
+       <GridPane fx:id="chat_bubble_pane" layoutX="36.0" maxWidth="298.0" minWidth="298.0" prefWidth="298.0" style="-fx-background-color:  #929292; -fx-background-radius: 0 15 15 15;">
            <columnConstraints>
                <ColumnConstraints />
            </columnConstraints>

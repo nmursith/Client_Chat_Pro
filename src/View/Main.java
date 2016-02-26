@@ -46,7 +46,10 @@ public class Main extends Application {
         stage.setIconified(false);
         stage.requestFocus();
 
+        javafx.scene.image.Image ico = new javafx.scene.image.Image(getClass().getResourceAsStream("Technical Support.png"));
+        stage.getIcons().add(ico);
 //
+
 //        scene.addEventFilter(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>() {
 //            @Override
 //            public void handle(MouseEvent mouseEvent) {

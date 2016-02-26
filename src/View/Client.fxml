@@ -36,9 +36,9 @@
                 </TextArea>
          </children>
       </Pane>
-        <Pane prefHeight="62.0" prefWidth="400.0" style="-fx-background-color: #929292;">
+        <Pane prefHeight="62.0" prefWidth="400.0" style="-fx-background-color: #27355F;">
             <children>
-                <Label layoutX="153.0" layoutY="9.0" maxWidth="237.0" prefHeight="33.0" prefWidth="73.0" text="vAssist" textFill="#f7941e">
+                <Label layoutX="153.0" layoutY="9.0" maxWidth="237.0" prefHeight="33.0" prefWidth="73.0" text="vAssist" textFill="#E8760C">
                     <font>
                         <Font name="System Bold" size="20.0" />
                     </font>

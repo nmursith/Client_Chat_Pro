@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Client_Chat_Pro:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Client_Chat_Pro_jar</output-path>
+    <root id="archive" name="Client_Chat_Pro.jar">
+      <element id="module-output" name="Client_Chat_Pro" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../ChatPro/lib/json-simple-1.1.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../ChatPro/lib/javacsv.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/apache-activemq-5.12.1/activemq-all-5.12.1.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

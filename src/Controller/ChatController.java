@@ -86,7 +86,7 @@ public class ChatController {
         gridPane.setStyle("-fx-background-color:#1F3C92;-fx-border-color:#1F3C92; -fx-padding:0em;");
         ColumnConstraints c1 = new ColumnConstraints();
 
-        c1.setPercentWidth(98);
+        c1.setPercentWidth(100);
         gridPane.getColumnConstraints().add(c1);
 
         return gridPane;
@@ -103,13 +103,16 @@ public class ChatController {
 
     private void sendMessage() throws IOException {
 
+        String enteredmessage = messageTextField.getText();
+        messageTextField.clear();
 
+        if(enteredmessage.trim().length()==0)
+            return;
         Task<Void> task = new Task<Void>() {
             @Override protected Void call() throws Exception {
                 Platform.runLater(() -> {
 
-                    String enteredmessage = messageTextField.getText();
-                    messageTextField.clear();
+
 
                     try {
                         ChatMessage chatMessage = getObjectMessage(enteredmessage);
